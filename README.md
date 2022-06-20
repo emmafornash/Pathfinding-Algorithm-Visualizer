@@ -1,1 +1,1 @@
-# A--Pathfinding-Algorithm
+# A*-and-Dijkstra's-Pathfinding-Algorithm
