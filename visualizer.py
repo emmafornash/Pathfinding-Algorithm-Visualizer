@@ -11,7 +11,7 @@ def main() -> None:
     pygame.display.set_caption("Pathfinding Visualizer")
     while True:
         for event in pygame.event.get():
-            # quit event
+            # quit window
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
