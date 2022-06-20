@@ -1,6 +1,7 @@
 from tkinter import messagebox, Tk
 import pygame
 import sys
+import logging
 
 # constants
 WIN_WIDTH = 500
@@ -50,20 +51,26 @@ class Box:
 
         pygame.draw.rect(win, color, (self.x * BOX_WIDTH, self.y * BOX_HEIGHT, BOX_WIDTH - 2, BOX_HEIGHT - 2))
 
-    def set_neighbours(self, grid: list, columns: int, rows: int) -> None:
-        # maybe add a way to get all surrounding blocks as neighbors instead of just four? might cut down on processing power, too
+    def set_neighbours(self, grid: list, columns: int, rows: int, all_eight: bool = True) -> None:
+        # maybe add a way to get all surrounding blocks as neighbors instead of just four?
+        if all_eight:
+            # finds all up to eight surrounding neighbours
+            for i in range(max(0, self.x - 1), min(self.x + 2, rows)):
+                for j in range(max(0, self.y - 1), min(self.y + 2, columns)):
+                    if i != self.x or j != self.y:
+                        self.neighbours.append(grid[i][j])
+        else:
+            # horizontal neighbours
+            if self.x > 0:
+                self.neighbours.append(grid[self.x - 1][self.y])
+            if self.x < columns - 1:
+                self.neighbours.append(grid[self.x + 1][self.y])
 
-        # horizontal neighbours
-        if self.x > 0:
-            self.neighbours.append(grid[self.x - 1][self.y])
-        if self.x < columns - 1:
-            self.neighbours.append(grid[self.x + 1][self.y])
-
-        # vertical neighbours
-        if self.y > 0:
-            self.neighbours.append(grid[self.x][self.y - 1])
-        if self.y < rows - 1:
-            self.neighbours.append(grid[self.x][self.y + 1])
+            # vertical neighbours
+            if self.y > 0:
+                self.neighbours.append(grid[self.x][self.y - 1])
+            if self.y < rows - 1:
+                self.neighbours.append(grid[self.x][self.y + 1])
 
 def create_grid(columns: int, rows: int) -> list:
     grid = []
@@ -94,6 +101,7 @@ def main() -> None:
     start_box = grid[0][0]
     start_box.start = True
     start_box.visited = True
+    print([(box.x, box.y) for box in start_box.neighbours])
 
     box_queue = []
     box_queue.append(start_box)
@@ -109,15 +117,14 @@ def main() -> None:
             # mouse controls
             elif event.type == pygame.MOUSEMOTION:
                 x, y = pygame.mouse.get_pos()
+                i = x // BOX_WIDTH
+                j = y // BOX_HEIGHT
+                # print(i, j)
                 # draw wall
                 if event.buttons[0]:
-                    i = x // BOX_WIDTH
-                    j = y // BOX_HEIGHT
                     grid[i][j].wall = True
                 # set target
                 if event.buttons[2] and not target_box_set:
-                    i = x // BOX_WIDTH
-                    j = y // BOX_HEIGHT
                     target_box = grid[i][j]
                     target_box.target = True
                     target_box_set = True
