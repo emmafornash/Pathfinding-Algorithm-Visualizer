@@ -1,1 +1,1 @@
-# A*-and-Dijkstra's-Pathfinding-Algorithm
+# A*-and-Dijkstra's-Pathfinding-Algorithm-Visualizer
