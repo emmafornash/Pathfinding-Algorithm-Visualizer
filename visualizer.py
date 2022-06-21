@@ -2,6 +2,7 @@ from tkinter import messagebox, Tk
 import pygame
 import sys
 import logging
+import numpy as np
 
 # constants
 WIN_WIDTH = 500
@@ -114,6 +115,16 @@ def soft_reset(grid: list) -> None:
         for box in i:
             box.reset()
 
+# basic heuristic function for A*
+def euclidean_dist(a: Box, b: Box):
+    a_point = np.array((a.x, a.y))
+    b_point = np.array((b.x, b.y))
+    return np.linalg.norm(a_point - b_point)
+
+# secondary basic heuristic function for just verticle and horizontal neighbors
+def manhattan_dist(a: Box, b: Box):
+    return abs(a.x - b.x) + abs(a.y - b.y)
+
 def main() -> None:
     begin_search = False
     target_box_set = False
@@ -165,6 +176,7 @@ def main() -> None:
                     target_box_set = True
             # start algorithm
             if event.type == pygame.KEYDOWN and target_box_set:
+                # resets algorithm
                 if begin_search == True:
                     soft_reset(grid)
                     set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
@@ -192,7 +204,7 @@ def main() -> None:
                         if not neighbour.queued and not neighbour.wall:
                             neighbour.queued = True
                             neighbour.prior = current_box
-                            box_queue.append(neighbour)    
+                            box_queue.append(neighbour)
             else:
                 if searching:
                     Tk().wm_withdraw()
