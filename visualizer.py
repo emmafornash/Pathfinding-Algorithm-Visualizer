@@ -1,3 +1,4 @@
+from fcntl import LOCK_WRITE
 from tkinter import messagebox, Tk
 import pygame
 import sys
@@ -36,12 +37,16 @@ class Box:
         self.neighbours = []
         self.prior = None
 
+        self.f = self.g = self.h = 0
+
     # resets all but start, target and wall
     def reset(self) -> None:
         self.queued = False
         self.visited = False
         self.neighbours = []
         self.prior = None
+
+        self.f = self.g = self.h = 0
 
     # resets all values to default
     def hard_reset(self) -> None:
@@ -52,6 +57,8 @@ class Box:
         self.visited = False
         self.neighbours = []
         self.prior = None
+
+        self.f = self.g = self.h = 0
     
     def draw(self, win, color) -> None:
         # if self.queued:
@@ -116,13 +123,13 @@ def soft_reset(grid: list) -> None:
             box.reset()
 
 # basic heuristic function for A*
-def euclidean_dist(a: Box, b: Box):
+def euclidean_dist(a: Box, b: Box) -> float:
     a_point = np.array((a.x, a.y))
     b_point = np.array((b.x, b.y))
     return np.linalg.norm(a_point - b_point)
 
 # secondary basic heuristic function for just verticle and horizontal neighbors
-def manhattan_dist(a: Box, b: Box):
+def manhattan_dist(a: Box, b: Box) -> float:
     return abs(a.x - b.x) + abs(a.y - b.y)
 
 def main() -> None:
@@ -130,6 +137,10 @@ def main() -> None:
     target_box_set = False
     searching = True
     target_box = None
+
+    # parameters for pathfinding algorithm
+    dijkstra = False
+    manhattan = False
 
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     pygame.display.set_caption("Pathfinding Visualizer")
@@ -139,10 +150,10 @@ def main() -> None:
     start_box = grid[0][0]
     start_box.start = True
     start_box.visited = True
-    print([(box.x, box.y) for box in start_box.neighbours])
 
-    box_queue = []
-    box_queue.append(start_box)
+    closed_set = []
+    open_set = []
+    open_set.append(start_box)
 
     path = []
 
@@ -180,8 +191,9 @@ def main() -> None:
                 if begin_search == True:
                     soft_reset(grid)
                     set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
-                    box_queue = []
-                    box_queue.append(start_box)
+                    open_set = []
+                    open_set.append(start_box)
+                    closed_set = []
                     path = []
                 searching = True
                 begin_search = not begin_search
@@ -189,10 +201,12 @@ def main() -> None:
                 # print(target_box)
         
         if begin_search:
-            # TODO: Add A*, maybe refactor to use functions
-            # Dijkstra's Algorithm
-            if len(box_queue) > 0 and searching:
-                current_box = box_queue.pop(0)
+            if len(open_set) and searching:
+                lowest_box = 0
+                for i in range(len(open_set)):
+                    if open_set[i].f < open_set[lowest_box].f:
+                        lowest_box = i
+                current_box = open_set[lowest_box]
                 current_box.visited = True
                 if current_box == target_box:
                     searching = False
@@ -200,11 +214,31 @@ def main() -> None:
                         path.append(current_box.prior)
                         current_box = current_box.prior
                 else:
+                    open_set.remove(current_box)
+                    closed_set.append(current_box)
                     for neighbour in current_box.neighbours:
-                        if not neighbour.queued and not neighbour.wall:
-                            neighbour.queued = True
-                            neighbour.prior = current_box
-                            box_queue.append(neighbour)
+                        if not neighbour in closed_set and not neighbour.wall:
+                            temp_g = current_box.g + 1
+
+                            if (neighbour in open_set):
+                                if temp_g < neighbour.g:
+                                    neighbour.g = temp_g
+                            else:
+                                neighbour.g = temp_g
+                                neighbour.queued = True
+                                neighbour.prior = current_box
+                                open_set.append(neighbour)
+
+                            # heuristic handling
+                            if not dijkstra:
+                                if not manhattan:
+                                    neighbour.h = euclidean_dist(neighbour, target_box)
+                                else:
+                                    neighbour.h = manhattan_dist(neighbour, target_box)
+                            else:
+                                neighbour.h = 0
+
+                            neighbour.f = neighbour.g + neighbour.h
             else:
                 if searching:
                     Tk().wm_withdraw()
