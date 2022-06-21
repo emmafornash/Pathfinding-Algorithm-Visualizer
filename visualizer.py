@@ -48,9 +48,8 @@ class Box:
 
         self.f = self.g = self.h = 0
 
-    # resets all values to default
+    # resets all values besides start to default
     def hard_reset(self) -> None:
-        self.start = False
         self.wall = False
         self.target = False
         self.queued = False
@@ -122,6 +121,12 @@ def soft_reset(grid: list) -> None:
         for box in i:
             box.reset()
 
+# resets all but start
+def hard_reset(grid: list) -> None:
+    for i in grid:
+        for box in i:
+            box.hard_reset()
+
 # basic heuristic function for A*
 def euclidean_dist(a: Box, b: Box) -> float:
     a_point = np.array((a.x, a.y))
@@ -186,19 +191,29 @@ def main() -> None:
                     target_box.target = True
                     target_box_set = True
             # start algorithm
-            if event.type == pygame.KEYDOWN and target_box_set:
-                # resets algorithm
-                if begin_search == True:
-                    soft_reset(grid)
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_r:
+                    # resets evertyhing
+                    hard_reset(grid)
                     set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
                     open_set = []
                     open_set.append(start_box)
                     closed_set = []
                     path = []
-                searching = True
-                begin_search = not begin_search
-                # print(begin_search)
-                # print(target_box)
+                    target_box_set = False
+                    searching = True
+                    begin_search = False
+                elif target_box_set:
+                    # resets algorithm
+                    if begin_search == True:
+                        soft_reset(grid)
+                        set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
+                        open_set = []
+                        open_set.append(start_box)
+                        closed_set = []
+                        path = []
+                    searching = True
+                    begin_search = not begin_search
         
         if begin_search:
             if len(open_set) and searching:
