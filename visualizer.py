@@ -34,6 +34,23 @@ class Box:
         self.visited = False
         self.neighbours = []
         self.prior = None
+
+    # resets all but start, target and wall
+    def reset(self) -> None:
+        self.queued = False
+        self.visited = False
+        self.neighbours = []
+        self.prior = None
+
+    # resets all values to default
+    def hard_reset(self) -> None:
+        self.start = False
+        self.wall = False
+        self.target = False
+        self.queued = False
+        self.visited = False
+        self.neighbours = []
+        self.prior = None
     
     def draw(self, win, color) -> None:
         # if self.queued:
@@ -71,6 +88,11 @@ class Box:
             if self.y < rows - 1:
                 self.neighbours.append(grid[self.x][self.y + 1])
 
+    def __repr__(self) -> str:
+        return (f'Box(x={self.x},y={self.y},start={self.start},wall={self.wall},' +
+                f'target={self.target},queued={self.queued},visited={self.visited}')
+
+# initially creates the grid for the algorithm to read from
 def create_grid(columns: int, rows: int) -> list:
     grid = []
     for i in range(columns):
@@ -78,13 +100,19 @@ def create_grid(columns: int, rows: int) -> list:
         for j in range(rows):
             arr.append(Box(i, j))
         grid.append(arr)
-    
     return grid
 
+# sets all neighbors within a grid
 def set_neighbours(grid: list, columns: int, rows: int) -> None:
     for i in grid:
         for box in i:
             box.set_neighbours(grid, columns, rows)
+
+# resets all but start, walls and target
+def soft_reset(grid: list) -> None:
+    for i in grid:
+        for box in i:
+            box.reset()
 
 def main() -> None:
     begin_search = False
@@ -137,9 +165,20 @@ def main() -> None:
                     target_box_set = True
             # start algorithm
             if event.type == pygame.KEYDOWN and target_box_set:
-                begin_search = True
+                if begin_search == True:
+                    soft_reset(grid)
+                    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
+                    box_queue = []
+                    box_queue.append(start_box)
+                    path = []
+                searching = True
+                begin_search = not begin_search
+                # print(begin_search)
+                # print(target_box)
         
         if begin_search:
+            # TODO: Add A*, maybe refactor to use functions
+            # Dijkstra's Algorithm
             if len(box_queue) > 0 and searching:
                 current_box = box_queue.pop(0)
                 current_box.visited = True
@@ -153,7 +192,7 @@ def main() -> None:
                         if not neighbour.queued and not neighbour.wall:
                             neighbour.queued = True
                             neighbour.prior = current_box
-                            box_queue.append(neighbour)
+                            box_queue.append(neighbour)    
             else:
                 if searching:
                     Tk().wm_withdraw()
