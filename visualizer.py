@@ -150,14 +150,14 @@ def main() -> None:
             # mouse controls
             elif event.type == pygame.MOUSEMOTION:
                 # draw wall
-                if event.buttons[0] and not grid[i][j].target and not grid[i][j].start:
+                if event.buttons[0] and not grid[i][j].target and not grid[i][j].start and searching:
                     grid[i][j].wall = True
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 # TODO: make this feel better before fully incorporating it
                 # if event.button == 1 and not grid[i][j].target and not grid[i][j].start:
                 #     grid[i][j].wall = not grid[i][j].wall
                 # set target
-                if event.button == 3 and not grid[i][j].wall and not grid[i][j].start:
+                if event.button == 3 and not grid[i][j].wall and not grid[i][j].start and searching:
                     if target_box_set:
                         target_box.target = False
                     target_box = grid[i][j]
