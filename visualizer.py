@@ -52,7 +52,6 @@ class Box:
         pygame.draw.rect(win, color, (self.x * BOX_WIDTH, self.y * BOX_HEIGHT, BOX_WIDTH - 2, BOX_HEIGHT - 2))
 
     def set_neighbours(self, grid: list, columns: int, rows: int, all_eight: bool = True) -> None:
-        # maybe add a way to get all surrounding blocks as neighbors instead of just four?
         if all_eight:
             # finds all up to eight surrounding neighbours
             for i in range(max(0, self.x - 1), min(self.x + 2, rows)):
@@ -110,21 +109,29 @@ def main() -> None:
 
     while True:
         for event in pygame.event.get():
+            # mouse position and relative cell
+            x, y = pygame.mouse.get_pos()
+            # need to change this to add resizable window support
+            i = x // BOX_WIDTH
+            j = y // BOX_HEIGHT
+
             # quit window
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             # mouse controls
             elif event.type == pygame.MOUSEMOTION:
-                x, y = pygame.mouse.get_pos()
-                i = x // BOX_WIDTH
-                j = y // BOX_HEIGHT
-                # print(i, j)
                 # draw wall
-                if event.buttons[0]:
+                if event.buttons[0] and not grid[i][j].target and not grid[i][j].start:
                     grid[i][j].wall = True
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                # TODO: make this feel better before fully incorporating it
+                # if event.button == 1 and not grid[i][j].target and not grid[i][j].start:
+                #     grid[i][j].wall = not grid[i][j].wall
                 # set target
-                if event.buttons[2] and not target_box_set:
+                if event.button == 3 and not grid[i][j].wall and not grid[i][j].start:
+                    if target_box_set:
+                        target_box.target = False
                     target_box = grid[i][j]
                     target_box.target = True
                     target_box_set = True
@@ -152,6 +159,7 @@ def main() -> None:
                     Tk().wm_withdraw()
                     messagebox.showinfo("No Solution", "There is no solution.")
                     searching = False
+
 
         win.fill(BACKDROP_COLOR)
 
