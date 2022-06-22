@@ -133,7 +133,7 @@ def euclidean_dist(a: Box, b: Box) -> float:
     b_point = np.array((b.x, b.y))
     return np.linalg.norm(a_point - b_point)
 
-# secondary basic heuristic function for just verticle and horizontal neighbors
+# secondary basic heuristic function for just vertical and horizontal neighbors
 def manhattan_dist(a: Box, b: Box) -> float:
     return abs(a.x - b.x) + abs(a.y - b.y)
 
@@ -156,7 +156,6 @@ def main() -> None:
     start_box.start = True
     start_box.visited = True
 
-    closed_set = []
     open_set = []
     open_set.append(start_box)
 
@@ -198,7 +197,6 @@ def main() -> None:
                     set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
                     open_set = []
                     open_set.append(start_box)
-                    closed_set = []
                     path = []
                     target_box_set = False
                     searching = True
@@ -210,11 +208,11 @@ def main() -> None:
                         set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
                         open_set = []
                         open_set.append(start_box)
-                        closed_set = []
                         path = []
                     searching = True
                     begin_search = not begin_search
         
+        # Dijkstra and A*
         if begin_search:
             if len(open_set) and searching:
                 lowest_box = 0
@@ -230,9 +228,8 @@ def main() -> None:
                         current_box = current_box.prior
                 else:
                     open_set.remove(current_box)
-                    closed_set.append(current_box)
                     for neighbour in current_box.neighbours:
-                        if not neighbour in closed_set and not neighbour.wall:
+                        if not neighbour.queued and not neighbour.wall:
                             temp_g = current_box.g + 1
 
                             if (neighbour in open_set):
