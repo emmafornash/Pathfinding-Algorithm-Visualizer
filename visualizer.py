@@ -1,4 +1,3 @@
-from fcntl import LOCK_WRITE
 from tkinter import messagebox, Tk
 import pygame
 import sys
@@ -99,6 +98,18 @@ class Box:
         return (f'Box(x={self.x},y={self.y},start={self.start},wall={self.wall},' +
                 f'target={self.target},queued={self.queued},visited={self.visited}')
 
+class Cursor(Box):
+    def __init__(self, i, j):
+        super().__init__(i, j)
+
+    def move(self, i, j):
+        self.x = i
+        self.y = j
+
+    def __repr__(self) -> str:
+        return (f'Cursor(x={self.x},y={self.y},start={self.start},wall={self.wall},' +
+                f'target={self.target},queued={self.queued},visited={self.visited}')
+
 # initially creates the grid for the algorithm to read from
 def create_grid(columns: int, rows: int) -> list:
     grid = []
@@ -121,11 +132,15 @@ def soft_reset(grid: list) -> None:
         for box in i:
             box.reset()
 
+    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
+
 # resets all but start
 def hard_reset(grid: list) -> None:
     for i in grid:
         for box in i:
             box.hard_reset()
+
+    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
 
 # basic heuristic function for A*
 def euclidean_dist(a: Box, b: Box) -> float:
@@ -150,6 +165,9 @@ def main() -> None:
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
     pygame.display.set_caption("Pathfinding Visualizer")
 
+    cursor = Cursor(0, 0)
+    cursor.start = True
+
     grid = create_grid(GRID_COLUMNS, GRID_ROWS)
     set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
     start_box = grid[0][0]
@@ -162,12 +180,15 @@ def main() -> None:
     path = []
 
     while True:
+        print(cursor)
         for event in pygame.event.get():
             # mouse position and relative cell
             x, y = pygame.mouse.get_pos()
             # need to change this to add resizable window support
             i = x // BOX_WIDTH
             j = y // BOX_HEIGHT
+
+            cursor.move(i, j)
 
             # quit window
             if event.type == pygame.QUIT:
@@ -194,7 +215,6 @@ def main() -> None:
                 if event.key == pygame.K_r:
                     # resets evertyhing
                     hard_reset(grid)
-                    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
                     open_set = []
                     open_set.append(start_box)
                     path = []
@@ -205,7 +225,6 @@ def main() -> None:
                     # resets algorithm
                     if begin_search == True:
                         soft_reset(grid)
-                        set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
                         open_set = []
                         open_set.append(start_box)
                         path = []
@@ -277,6 +296,9 @@ def main() -> None:
                     box.draw(win, WALL_COLOR)
                 if box.target:
                     box.draw(win, TARGET_COLOR)
+        
+        if not begin_search:
+            cursor.draw(win, START_COLOR)
 
         pygame.display.flip()
 
