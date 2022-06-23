@@ -162,8 +162,9 @@ def main() -> None:
     dijkstra = False
     manhattan = False
 
+    clock = pygame.time.Clock()
+
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
-    pygame.display.set_caption("Pathfinding Visualizer")
 
     cursor = Cursor(0, 0)
     cursor.start = True
@@ -179,127 +180,163 @@ def main() -> None:
 
     path = []
 
-    while True:
-        print(cursor)
-        for event in pygame.event.get():
-            # mouse position and relative cell
-            x, y = pygame.mouse.get_pos()
-            # need to change this to add resizable window support
-            i = x // BOX_WIDTH
-            j = y // BOX_HEIGHT
+    def grid_screen():
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
 
-            cursor.move(i, j)
+        pygame.display.set_caption("Pathfinding Visualizer")
+        win.fill(BACKDROP_COLOR)
+        while True:
+            # clock.tick(165)
+            for event in pygame.event.get():
+                # mouse position and relative cell
+                x, y = pygame.mouse.get_pos()
+                # need to change this to add resizable window support
+                i = x // BOX_WIDTH
+                j = y // BOX_HEIGHT
 
-            # quit window
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
-            # mouse controls
-            elif event.type == pygame.MOUSEMOTION:
-                # draw wall
-                if event.buttons[0] and not grid[i][j].target and not grid[i][j].start and searching:
-                    grid[i][j].wall = True
-            elif event.type == pygame.MOUSEBUTTONDOWN:
-                # TODO: make this feel better before fully incorporating it
-                # if event.button == 1 and not grid[i][j].target and not grid[i][j].start:
-                #     grid[i][j].wall = not grid[i][j].wall
-                # set target
-                if event.button == 3 and not grid[i][j].wall and not grid[i][j].start and searching:
-                    if target_box_set:
-                        target_box.target = False
-                    target_box = grid[i][j]
-                    target_box.target = True
-                    target_box_set = True
-            # start algorithm
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_r:
-                    # resets evertyhing
-                    hard_reset(grid)
-                    open_set = []
-                    open_set.append(start_box)
-                    path = []
-                    target_box_set = False
-                    searching = True
-                    begin_search = False
-                elif target_box_set:
-                    # resets algorithm
-                    if begin_search == True:
-                        soft_reset(grid)
+                cursor.move(i, j)
+
+                # quit window
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                # mouse controls
+                elif event.type == pygame.MOUSEMOTION:
+                    # draw wall
+                    if event.buttons[0] and not grid[i][j].target and not grid[i][j].start and searching:
+                        grid[i][j].wall = True
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    # TODO: make this feel better before fully incorporating it
+                    # if event.button == 1 and not grid[i][j].target and not grid[i][j].start:
+                    #     grid[i][j].wall = not grid[i][j].wall
+                    # set target
+                    if event.button == 3 and not grid[i][j].wall and not grid[i][j].start and searching:
+                        if target_box_set:
+                            target_box.target = False
+                        target_box = grid[i][j]
+                        target_box.target = True
+                        target_box_set = True
+                # start algorithm
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_r:
+                        # resets evertyhing
+                        hard_reset(grid)
                         open_set = []
                         open_set.append(start_box)
                         path = []
-                    searching = True
-                    begin_search = not begin_search
-        
-        # Dijkstra and A*
-        if begin_search:
-            if len(open_set) and searching:
-                lowest_box = 0
-                for i in range(len(open_set)):
-                    if open_set[i].f < open_set[lowest_box].f:
-                        lowest_box = i
-                current_box = open_set[lowest_box]
-                current_box.visited = True
-                if current_box == target_box:
-                    searching = False
-                    while current_box.prior != start_box:
-                        path.append(current_box.prior)
-                        current_box = current_box.prior
-                else:
-                    open_set.remove(current_box)
-                    for neighbour in current_box.neighbours:
-                        if not neighbour.queued and not neighbour.wall:
-                            temp_g = current_box.g + 1
+                        target_box_set = False
+                        searching = True
+                        begin_search = False
+                    elif event.key == pygame.K_ESCAPE:
+                        menu_screen()
+                    elif target_box_set:
+                        # resets algorithm
+                        if begin_search == True:
+                            soft_reset(grid)
+                            open_set = []
+                            open_set.append(start_box)
+                            path = []
+                        searching = True
+                        begin_search = not begin_search
+            
+            # Dijkstra and A*
+            if begin_search:
+                if len(open_set) and searching:
+                    lowest_box = 0
+                    for i in range(len(open_set)):
+                        if open_set[i].f < open_set[lowest_box].f:
+                            lowest_box = i
+                    current_box = open_set[lowest_box]
+                    current_box.visited = True
+                    if current_box == target_box:
+                        searching = False
+                        while current_box.prior != start_box:
+                            path.append(current_box.prior)
+                            current_box = current_box.prior
+                    else:
+                        open_set.remove(current_box)
+                        for neighbour in current_box.neighbours:
+                            if not neighbour.queued and not neighbour.wall:
+                                temp_g = current_box.g + 1
 
-                            if (neighbour in open_set):
-                                if temp_g < neighbour.g:
-                                    neighbour.g = temp_g
-                            else:
-                                neighbour.g = temp_g
-                                neighbour.queued = True
-                                neighbour.prior = current_box
-                                open_set.append(neighbour)
-
-                            # heuristic handling
-                            if not dijkstra:
-                                if not manhattan:
-                                    neighbour.h = euclidean_dist(neighbour, target_box)
+                                if (neighbour in open_set):
+                                    if temp_g < neighbour.g:
+                                        neighbour.g = temp_g
                                 else:
-                                    neighbour.h = manhattan_dist(neighbour, target_box)
-                            else:
-                                neighbour.h = 0
+                                    neighbour.g = temp_g
+                                    neighbour.queued = True
+                                    neighbour.prior = current_box
+                                    open_set.append(neighbour)
 
-                            neighbour.f = neighbour.g + neighbour.h
-            else:
-                if searching:
-                    Tk().wm_withdraw()
-                    messagebox.showinfo("No Solution", "There is no solution.")
-                    searching = False
+                                # heuristic handling
+                                if not dijkstra:
+                                    if not manhattan:
+                                        neighbour.h = euclidean_dist(neighbour, target_box)
+                                    else:
+                                        neighbour.h = manhattan_dist(neighbour, target_box)
+                                else:
+                                    neighbour.h = 0
 
+                                neighbour.f = neighbour.g + neighbour.h
+                else:
+                    if searching:
+                        Tk().wm_withdraw()
+                        messagebox.showinfo("No Solution", "There is no solution.")
+                        searching = False
 
+            # draws all assets
+            win.fill(BACKDROP_COLOR)
+
+            for i in grid:
+                for box in i:
+                    box.draw(win, GRID_COLOR)
+
+                    if box.queued:
+                        box.draw(win, QUEUED_COLOR)
+                    if box.visited:
+                        box.draw(win, VISITED_COLOR)
+                    if box in path:
+                        box.draw(win, PATH_COLOR)
+                    
+                    if box.start:
+                        box.draw(win, START_COLOR)
+                    if box.wall:
+                        box.draw(win, WALL_COLOR)
+                    if box.target:
+                        box.draw(win, TARGET_COLOR)
+            
+            if not begin_search:
+                cursor.draw(win, START_COLOR)
+
+            pygame.display.update()
+
+    def menu_screen():
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
+
+        pygame.display.set_caption("Menu")
         win.fill(BACKDROP_COLOR)
+        while True:
+            for event in pygame.event.get():
+                # mouse position and relative cell
+                x, y = pygame.mouse.get_pos()
+                # need to change this to add resizable window support
+                i = x // BOX_WIDTH
+                j = y // BOX_HEIGHT
 
-        for i in grid:
-            for box in i:
-                box.draw(win, GRID_COLOR)
+                cursor.move(i, j)
 
-                if box.queued:
-                    box.draw(win, QUEUED_COLOR)
-                if box.visited:
-                    box.draw(win, VISITED_COLOR)
-                if box in path:
-                    box.draw(win, PATH_COLOR)
-                
-                if box.start:
-                    box.draw(win, START_COLOR)
-                if box.wall:
-                    box.draw(win, WALL_COLOR)
-                if box.target:
-                    box.draw(win, TARGET_COLOR)
-        
-        if not begin_search:
-            cursor.draw(win, START_COLOR)
+                # quit window
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        grid_screen()
 
-        pygame.display.flip()
+            win.fill(BACKDROP_COLOR)
+
+            pygame.display.update()
+
+    grid_screen()
 
 main()
