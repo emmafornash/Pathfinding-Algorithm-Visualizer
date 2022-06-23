@@ -1,8 +1,10 @@
+from email.mime import image
 from tkinter import messagebox, Tk
 import pygame
 import sys
 import logging
 import numpy as np
+import button
 
 # constants
 WIN_WIDTH = 500
@@ -24,9 +26,8 @@ QUEUED_COLOR = (200, 0, 0)
 PATH_COLOR = (0, 0, 200)
 
 class Box:
-    def __init__(self, i, j) -> None:
-        self.x = i
-        self.y = j
+    def __init__(self, x, y) -> None:
+        self.x, self.y = x, y
         # maybe change this to an enum? might make the code more readable
         self.start = False
         self.wall = False
@@ -59,19 +60,6 @@ class Box:
         self.f = self.g = self.h = 0
     
     def draw(self, win, color) -> None:
-        # if self.queued:
-        #     color = QUEUED_COLOR
-        # elif self.visited:
-        #     color = VISITED_COLOR
-        # if self.start:
-        #     color = START_COLOR
-        # elif self.wall:
-        #     color = WALL_COLOR
-        # elif self.target:
-        #     color = TARGET_COLOR
-        # else:
-        #     color = GRID_COLOR
-
         pygame.draw.rect(win, color, (self.x * BOX_WIDTH, self.y * BOX_HEIGHT, BOX_WIDTH - 2, BOX_HEIGHT - 2))
 
     def set_neighbours(self, grid: list, columns: int, rows: int, all_eight: bool = True) -> None:
@@ -102,18 +90,17 @@ class Box:
                 f'target={self.target},queued={self.queued},visited={self.visited}')
 
 class Cursor(Box):
-    def __init__(self, i, j):
-        super().__init__(i, j)
+    def __init__(self, x, y):
+        super().__init__(x, y)
 
-    def move(self, i, j):
-        self.x = i
-        self.y = j
+    def move(self, x, y):
+        self.x, self.y = x, y
 
     def __repr__(self) -> str:
         return (f'Cursor(x={self.x},y={self.y},start={self.start},wall={self.wall},' +
                 f'target={self.target},queued={self.queued},visited={self.visited}')
 
-# initially creates the grid for the algorithm to read from
+# creates the grid for the algorithm to read from
 def create_grid(columns: int, rows: int) -> list:
     grid = []
     for i in range(columns):
@@ -179,6 +166,7 @@ def main() -> None:
 
     path = []
 
+    # screen with grid and visualization
     def grid_screen() -> None:
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
 
@@ -310,6 +298,7 @@ def main() -> None:
 
             pygame.display.update()
 
+    # main menu screen
     def menu_screen() -> None:
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
 
