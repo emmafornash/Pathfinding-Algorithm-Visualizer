@@ -1,1 +1,1 @@
-# A*-and-Dijkstra's-Pathfinding-Algorithm-Visualizer
+# A* and Dijkstra's Pathfinding Algorithm Visualizer
