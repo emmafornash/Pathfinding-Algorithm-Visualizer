@@ -75,6 +75,9 @@ class Box:
         pygame.draw.rect(win, color, (self.x * BOX_WIDTH, self.y * BOX_HEIGHT, BOX_WIDTH - 2, BOX_HEIGHT - 2))
 
     def set_neighbours(self, grid: list, columns: int, rows: int, all_eight: bool = True) -> None:
+        if self.neighbours:
+            self.neighbours = []
+
         if all_eight:
             # finds all up to eight surrounding neighbours
             for i in range(max(0, self.x - 1), min(self.x + 2, rows)):
@@ -121,26 +124,22 @@ def create_grid(columns: int, rows: int) -> list:
     return grid
 
 # sets all neighbors within a grid
-def set_neighbours(grid: list, columns: int, rows: int) -> None:
+def set_neighbours(grid: list, columns: int, rows: int, alleight: bool = True) -> None:
     for i in grid:
         for box in i:
-            box.set_neighbours(grid, columns, rows)
+            box.set_neighbours(grid, columns, rows, alleight)
 
-# resets all but start, walls and target
-def soft_reset(grid: list) -> None:
+# resets all but start, walls and target by default
+# if hard_reset is set to True, resets all but start
+def reset(grid: list, alleight: bool, hard_reset: bool = False) -> None:
     for i in grid:
         for box in i:
-            box.reset()
+            if hard_reset:
+                box.hard_reset()
+            else:
+                box.reset()
 
-    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
-
-# resets all but start
-def hard_reset(grid: list) -> None:
-    for i in grid:
-        for box in i:
-            box.hard_reset()
-
-    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
+    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS, alleight)
 
 # basic heuristic function for A*
 def euclidean_dist(a: Box, b: Box) -> float:
@@ -170,7 +169,7 @@ def main() -> None:
     cursor.start = True
 
     grid = create_grid(GRID_COLUMNS, GRID_ROWS)
-    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS)
+    set_neighbours(grid, GRID_COLUMNS, GRID_ROWS, not manhattan)
     start_box = grid[0][0]
     start_box.start = True
     start_box.visited = True
@@ -180,7 +179,7 @@ def main() -> None:
 
     path = []
 
-    def grid_screen():
+    def grid_screen() -> None:
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
 
         pygame.display.set_caption("Pathfinding Visualizer")
@@ -218,21 +217,22 @@ def main() -> None:
                         target_box_set = True
                 # start algorithm
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_r:
+                    if event.key == pygame.K_ESCAPE:
+                        if not begin_search or not searching:
+                            menu_screen()
+                    elif event.key == pygame.K_r:
                         # resets evertyhing
-                        hard_reset(grid)
+                        reset(grid, not manhattan, True)
                         open_set = []
                         open_set.append(start_box)
                         path = []
                         target_box_set = False
                         searching = True
                         begin_search = False
-                    elif event.key == pygame.K_ESCAPE:
-                        menu_screen()
                     elif target_box_set:
                         # resets algorithm
                         if begin_search == True:
-                            soft_reset(grid)
+                            reset(grid, not manhattan)
                             open_set = []
                             open_set.append(start_box)
                             path = []
@@ -310,7 +310,7 @@ def main() -> None:
 
             pygame.display.update()
 
-    def menu_screen():
+    def menu_screen() -> None:
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
 
         pygame.display.set_caption("Menu")
@@ -332,6 +332,13 @@ def main() -> None:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         grid_screen()
+                    elif event.key == pygame.K_m:
+                        manhattan = not manhattan
+                        print(f'manhattan={manhattan}')
+                        set_neighbours(grid, GRID_COLUMNS, GRID_ROWS, not manhattan)
+                    elif event.key == pygame.K_d:
+                        dijkstra = not dijkstra
+                        print(f'dijkstra={dijkstra}')
 
             win.fill(BACKDROP_COLOR)
 
