@@ -32,7 +32,7 @@ HOVERING_BUTTON_COLOR = '#FFFFFF'
 # buttons
 FONT = pygame.font.Font("assets/fonts/font.ttf", 25)
 MANHATTAN_POS = (150, 200)
-DIJKSTRA_POS = (63, 300)
+DIJKSTRA_POS = (150, 300)
 
 class Box:
     def __init__(self, x, y) -> None:
@@ -330,13 +330,6 @@ def main() -> None:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         grid_screen()
-                    elif event.key == pygame.K_m:
-                        manhattan = not manhattan
-                        print(f'manhattan={manhattan}')
-                        set_neighbours(grid, GRID_COLUMNS, GRID_ROWS, not manhattan)
-                    elif event.key == pygame.K_d:
-                        dijkstra = not dijkstra
-                        print(f'dijkstra={dijkstra}')
                 if event.type == pygame.MOUSEMOTION:
                     for button in buttons:
                         button.change_color((x, y))

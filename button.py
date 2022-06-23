@@ -13,12 +13,11 @@ class Button():
 
     def draw(self, win) -> None:
         # win.blit(self.image, (self.rect.x, self.rect.y))
-        win.blit(self.text, (self.rect.x, self.rect.y))
+        win.blit(self.text, (self.text_rect.x, self.text_rect.y))
 
     # checks for movement within the button's area
     def check_for_input(self, pos) -> bool:
-        print(self.text_input + "," + str(pos[0] in range(self.rect.left, self.rect.right) and pos[1] in range(self.rect.top, self.rect.bottom)))
-        return (pos[0] in range(self.rect.left, self.rect.right) and pos[1] in range(self.rect.top, self.rect.bottom))
+        return (pos[0] in range(self.text_rect.left, self.text_rect.right) and pos[1] in range(self.text_rect.top, self.text_rect.bottom))
 
     # changes images within a button
     def change_image(self, image) -> None:
