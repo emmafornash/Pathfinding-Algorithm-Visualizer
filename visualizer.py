@@ -1,10 +1,11 @@
-from email.mime import image
 from tkinter import messagebox, Tk
 import pygame
 import sys
 import logging
 import numpy as np
-import button
+from button import Button
+
+pygame.init()
 
 # constants
 WIN_WIDTH = 500
@@ -171,7 +172,6 @@ def main() -> None:
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
 
         pygame.display.set_caption("Pathfinding Visualizer")
-        win.fill(BACKDROP_COLOR)
         while True:
             # clock.tick(165)
             for event in pygame.event.get():
@@ -296,23 +296,28 @@ def main() -> None:
             if not begin_search:
                 cursor.draw(win, START_COLOR)
 
-            pygame.display.update()
+            pygame.display.flip()
 
     # main menu screen
     def menu_screen() -> None:
+        FONT = pygame.font.Font("assets/fonts/font.ttf", 25)
+        MANHATTAN_POS = (150, 200)
+        MANHATTAN_BUTTON = Button(x=MANHATTAN_POS[0], y=MANHATTAN_POS[1], image=None, text_input="Euclidean", 
+                                    font=FONT, base_color='#d7fcd4', hovering_color='White')
+
+        DIJKSTRA_POS = (150, 300)
+        DIJKSTRA_BUTTON = Button(x=DIJKSTRA_POS[0], y=DIJKSTRA_POS[1], image=None, text_input="A*", 
+                                    font=FONT, base_color='#d7fcd4', hovering_color='White')
+
+        buttons = [MANHATTAN_BUTTON, DIJKSTRA_BUTTON]
+
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
 
         pygame.display.set_caption("Menu")
-        win.fill(BACKDROP_COLOR)
         while True:
             for event in pygame.event.get():
                 # mouse position and relative cell
                 x, y = pygame.mouse.get_pos()
-                # need to change this to add resizable window support
-                i = x // BOX_WIDTH
-                j = y // BOX_HEIGHT
-
-                cursor.move(i, j)
 
                 # quit window
                 if event.type == pygame.QUIT:
@@ -328,10 +333,34 @@ def main() -> None:
                     elif event.key == pygame.K_d:
                         dijkstra = not dijkstra
                         print(f'dijkstra={dijkstra}')
+                if event.type == pygame.MOUSEMOTION:
+                    for button in buttons:
+                        button.change_color((x, y))
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if MANHATTAN_BUTTON.check_for_input((x, y)):
+                        manhattan = not manhattan
+                        print(f'manhattan={manhattan}')
+                        set_neighbours(grid, GRID_COLUMNS, GRID_ROWS, not manhattan)
+
+                        if manhattan:
+                            MANHATTAN_BUTTON.change_text("Manhattan")
+                        else:
+                            MANHATTAN_BUTTON.change_text("Euclidean")
+                    if DIJKSTRA_BUTTON.check_for_input((x, y)):
+                        dijkstra = not dijkstra
+                        print(f'dijkstra={dijkstra}')
+
+                        if dijkstra:
+                            DIJKSTRA_BUTTON.change_text("Dijkstra")
+                        else:
+                            DIJKSTRA_BUTTON.change_text("A*")
 
             win.fill(BACKDROP_COLOR)
 
-            pygame.display.update()
+            for button in buttons:
+                button.draw(win)
+
+            pygame.display.flip()
 
     grid_screen()
 
