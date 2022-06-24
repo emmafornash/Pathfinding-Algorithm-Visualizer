@@ -4,6 +4,7 @@ import sys
 import logging
 import numpy as np
 from button import Button
+from enum import Enum
 
 pygame.init()
 
@@ -35,6 +36,11 @@ FONT = pygame.font.Font("assets/fonts/font.ttf", 25)
 MANHATTAN_POS = (150, 200)
 DIJKSTRA_POS = (150, 300)
 
+class DRAW(Enum):
+    START = 0
+    WALL = 1
+    TARGET = 2
+
 class Box:
     def __init__(self, x, y) -> None:
         self.x, self.y = x, y
@@ -60,6 +66,7 @@ class Box:
 
     # resets all values besides start to default
     def hard_reset(self) -> None:
+        self.start = False
         self.wall = False
         self.target = False
         self.queued = False
@@ -162,6 +169,8 @@ def main() -> None:
 
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
+    draw_state = DRAW.START
+
     cursor = Cursor(0, 0)
     cursor.start = True
 
@@ -183,7 +192,7 @@ def main() -> None:
 
     # screen with grid and visualization
     def grid_screen() -> None:
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
 
         pygame.display.set_caption("Pathfinding Visualizer")
         while True:
@@ -194,8 +203,6 @@ def main() -> None:
                 # need to change this to add resizable window support
                 i = x // BOX_WIDTH
                 j = y // BOX_HEIGHT
-
-                cursor.move(i, j)
 
                 # quit window
                 if event.type == pygame.QUIT:
@@ -211,20 +218,45 @@ def main() -> None:
                     # if event.button == 1 and not grid[i][j].target and not grid[i][j].start:
                     #     grid[i][j].wall = not grid[i][j].wall
                     # set target
-                    if event.button == 3 and not grid[i][j].wall and not grid[i][j].start and searching:
-                        if target_box_set:
-                            target_box.target = False
-                        target_box = grid[i][j]
-                        target_box.target = True
-                        target_box_set = True
+                    if event.button == 1 and searching:
+                        match draw_state:
+                            case DRAW.START:
+                                if not grid[i][j].wall and not grid[i][j].target:
+                                    start_box.hard_reset()
+                                    start_box = grid[i][j]
+                                    start_box.start = True
+                                    start_box.visited = True
+                                    open_set = []
+                                    open_set.append(start_box)
+                            case DRAW.WALL:
+                                if not grid[i][j].start and not grid[i][j].target:
+                                    grid[i][j].wall = True
+                            case DRAW.TARGET:
+                                if not grid[i][j].wall and not grid[i][j].start:
+                                    if target_box_set:
+                                        target_box.target = False
+                                    target_box = grid[i][j]
+                                    target_box.target = True
+                                    target_box_set = True
+                    elif event.button == 3 and searching:
+                        grid[i][j].hard_reset()
                 # start algorithm
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         if not begin_search or not searching:
                             menu_screen()
+                    elif event.key == pygame.K_s:
+                        draw_state = DRAW.START
+                    elif event.key == pygame.K_w:
+                        draw_state = DRAW.WALL
+                    elif event.key == pygame.K_t:
+                        draw_state = DRAW.TARGET
                     elif event.key == pygame.K_r:
                         # resets evertyhing
                         reset(grid, not manhattan, True)
+                        start_box = grid[0][0]
+                        start_box.start = True
+                        start_box.visited = True
                         open_set = []
                         open_set.append(start_box)
                         path = []
@@ -240,6 +272,18 @@ def main() -> None:
                             path = []
                         searching = True
                         begin_search = not begin_search
+
+                cursor.move(i, j)
+                cursor.hard_reset()
+                match draw_state:
+                    case DRAW.START:
+                        cursor.start = True
+                    case DRAW.WALL:
+                        cursor.wall = True
+                    case DRAW.TARGET:
+                        cursor.target = True
+                    case _:
+                        pass
             
             # Dijkstra and A*
             if begin_search:
@@ -308,7 +352,12 @@ def main() -> None:
                         box.draw(win, TARGET_COLOR)
             
             if not begin_search:
-                cursor.draw(win, START_COLOR)
+                if cursor.start:
+                    cursor.draw(win, START_COLOR)
+                if cursor.wall:
+                    cursor.draw(win, WALL_COLOR)
+                if cursor.target:
+                    cursor.draw(win, TARGET_COLOR)
 
             pygame.display.flip()
 
@@ -316,7 +365,7 @@ def main() -> None:
     def menu_screen() -> None:
         buttons = [manhattan_button, dijkstra_button]
 
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
 
         pygame.display.set_caption("Menu")
         while True:
