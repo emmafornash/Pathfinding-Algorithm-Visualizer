@@ -214,7 +214,7 @@ def main() -> None:
                 # mouse controls
                 elif event.type == pygame.MOUSEMOTION:
                     # draw wall
-                    if event.buttons[0] and not grid[i][j].target and not grid[i][j].start and searching:
+                    if event.buttons[0] and not grid[i][j].target and not grid[i][j].start and searching and draw_state == DRAW.WALL:
                         grid[i][j].wall = True
                     elif event.buttons[2]:
                         grid[i][j].hard_reset()
@@ -373,6 +373,8 @@ def main() -> None:
     # main menu screen
     def menu_screen() -> None:
         buttons = [manhattan_button, dijkstra_button, draw_state_button]
+        states = [DRAW.START, DRAW.WALL, DRAW.TARGET]
+        draw_num = 0
 
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
 
@@ -381,7 +383,7 @@ def main() -> None:
             for event in pygame.event.get():
                 # mouse position and relative cell
                 x, y = pygame.mouse.get_pos()
-
+                
                 # quit window
                 if event.type == pygame.QUIT:
                     pygame.quit()
@@ -411,19 +413,18 @@ def main() -> None:
                         else:
                             dijkstra_button.change_text("A*")
                     if draw_state_button.check_for_input((x, y)):
-                        match draw_state:
-                            case DRAW.START:
-                                draw_state = DRAW.WALL
-                                draw_state_button.change_text("Wall")
-                            case DRAW.WALL:
-                                draw_state = DRAW.TARGET
-                                draw_state_button.change_text("Target")
-                            case DRAW.TARGET:
-                                draw_state = DRAW.START
-                                draw_state_button.change_text("Start")
-                            case _:
-                                pass
+                        draw_num += 1
+                        draw_state = states[draw_num % len(states)]
 
+            match draw_state:
+                case DRAW.START:
+                    draw_state_button.change_text("Start")
+                case DRAW.WALL:
+                    draw_state_button.change_text("Wall")
+                case DRAW.TARGET:
+                    draw_state_button.change_text("Target")
+                case _:
+                    pass
 
             win.fill(BACKDROP_COLOR)
 
