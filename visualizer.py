@@ -372,11 +372,21 @@ def main() -> None:
 
     # main menu screen
     def menu_screen() -> None:
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
+
         buttons = [manhattan_button, dijkstra_button, draw_state_button]
         states = [DRAW.START, DRAW.WALL, DRAW.TARGET]
-        draw_num = 0
+        draw_num = states.index(draw_state)
 
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
+        match draw_state:
+            case DRAW.START:
+                draw_state_button.change_text("Start")
+            case DRAW.WALL:
+                draw_state_button.change_text("Wall")
+            case DRAW.TARGET:
+                draw_state_button.change_text("Target")
+            case _:
+                pass
 
         pygame.display.set_caption("Menu")
         while True:
@@ -413,18 +423,17 @@ def main() -> None:
                         else:
                             dijkstra_button.change_text("A*")
                     if draw_state_button.check_for_input((x, y)):
+                        match draw_state:
+                            case DRAW.START:
+                                draw_state_button.change_text("Wall")
+                            case DRAW.WALL:
+                                draw_state_button.change_text("Target")
+                            case DRAW.TARGET:
+                                draw_state_button.change_text("Start")
+                            case _:
+                                pass
                         draw_num += 1
                         draw_state = states[draw_num % len(states)]
-
-            match draw_state:
-                case DRAW.START:
-                    draw_state_button.change_text("Start")
-                case DRAW.WALL:
-                    draw_state_button.change_text("Wall")
-                case DRAW.TARGET:
-                    draw_state_button.change_text("Target")
-                case _:
-                    pass
 
             win.fill(BACKDROP_COLOR)
 
