@@ -26,10 +26,11 @@ VISITED_COLOR = (0, 200, 0)
 QUEUED_COLOR = (200, 0, 0)
 PATH_COLOR = (0, 0, 200)
 
-
+# buttons
 BASE_BUTTON_COLOR = '#acc9a9'
 HOVERING_BUTTON_COLOR = '#FFFFFF'
-# buttons
+BUTTON_IMG = pygame.transform.scale(pygame.image.load("assets/buttons/button_rect.png"), (240, 75))
+
 FONT = pygame.font.Font("assets/fonts/font.ttf", 25)
 MANHATTAN_POS = (150, 200)
 DIJKSTRA_POS = (150, 300)
@@ -175,9 +176,9 @@ def main() -> None:
 
     path = []
 
-    manhattan_button = Button(x=MANHATTAN_POS[0], y=MANHATTAN_POS[1], image=None, text_input="Euclidean", 
+    manhattan_button = Button(x=MANHATTAN_POS[0], y=MANHATTAN_POS[1], image=BUTTON_IMG, text_input="Euclidean", 
                                 font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
-    dijkstra_button = Button(x=DIJKSTRA_POS[0], y=DIJKSTRA_POS[1], image=None, text_input="A*", 
+    dijkstra_button = Button(x=DIJKSTRA_POS[0], y=DIJKSTRA_POS[1], image=BUTTON_IMG, text_input="A*", 
                                 font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
 
     # screen with grid and visualization
