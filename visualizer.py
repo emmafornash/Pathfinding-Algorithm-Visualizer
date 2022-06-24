@@ -33,6 +33,7 @@ HOVERING_BUTTON_COLOR = '#FFFFFF'
 BUTTON_IMG = pygame.transform.scale(pygame.image.load("assets/buttons/button_rect.png"), (240, 75))
 
 FONT = pygame.font.Font("assets/fonts/font.ttf", 25)
+DRAW_POS = (150, 100)
 MANHATTAN_POS = (150, 200)
 DIJKSTRA_POS = (150, 300)
 
@@ -188,6 +189,8 @@ def main() -> None:
     manhattan_button = Button(x=MANHATTAN_POS[0], y=MANHATTAN_POS[1], image=BUTTON_IMG, text_input="Euclidean", 
                                 font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
     dijkstra_button = Button(x=DIJKSTRA_POS[0], y=DIJKSTRA_POS[1], image=BUTTON_IMG, text_input="A*", 
+                                font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
+    draw_state_button = Button(x=DRAW_POS[0], y=DRAW_POS[1], image=BUTTON_IMG, text_input="Start",
                                 font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
 
     # screen with grid and visualization
@@ -369,7 +372,7 @@ def main() -> None:
 
     # main menu screen
     def menu_screen() -> None:
-        buttons = [manhattan_button, dijkstra_button]
+        buttons = [manhattan_button, dijkstra_button, draw_state_button]
 
         nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
 
@@ -407,6 +410,20 @@ def main() -> None:
                             dijkstra_button.change_text("Dijkstra")
                         else:
                             dijkstra_button.change_text("A*")
+                    if draw_state_button.check_for_input((x, y)):
+                        match draw_state:
+                            case DRAW.START:
+                                draw_state = DRAW.WALL
+                                draw_state_button.change_text("Wall")
+                            case DRAW.WALL:
+                                draw_state = DRAW.TARGET
+                                draw_state_button.change_text("Target")
+                            case DRAW.TARGET:
+                                draw_state = DRAW.START
+                                draw_state_button.change_text("Start")
+                            case _:
+                                pass
+
 
             win.fill(BACKDROP_COLOR)
 
