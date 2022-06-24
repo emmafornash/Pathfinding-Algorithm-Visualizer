@@ -213,6 +213,8 @@ def main() -> None:
                     # draw wall
                     if event.buttons[0] and not grid[i][j].target and not grid[i][j].start and searching:
                         grid[i][j].wall = True
+                    elif event.buttons[2]:
+                        grid[i][j].hard_reset()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # TODO: make this feel better before fully incorporating it
                     # if event.button == 1 and not grid[i][j].target and not grid[i][j].start:
@@ -220,6 +222,7 @@ def main() -> None:
                     # set target
                     if event.button == 1 and searching:
                         match draw_state:
+                            # set start point
                             case DRAW.START:
                                 if not grid[i][j].wall and not grid[i][j].target:
                                     start_box.hard_reset()
@@ -228,9 +231,11 @@ def main() -> None:
                                     start_box.visited = True
                                     open_set = []
                                     open_set.append(start_box)
+                            # add walls
                             case DRAW.WALL:
                                 if not grid[i][j].start and not grid[i][j].target:
                                     grid[i][j].wall = True
+                            # set target point
                             case DRAW.TARGET:
                                 if not grid[i][j].wall and not grid[i][j].start:
                                     if target_box_set:
@@ -287,6 +292,7 @@ def main() -> None:
             
             # Dijkstra and A*
             if begin_search:
+                set_neighbours(grid, GRID_COLUMNS, GRID_ROWS, not manhattan)
                 if len(open_set) and searching:
                     lowest_box = 0
                     for i in range(len(open_set)):
