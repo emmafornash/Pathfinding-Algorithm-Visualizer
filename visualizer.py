@@ -159,6 +159,7 @@ def manhattan_dist(a: Box, b: Box) -> float:
 def main() -> None:
     # initial parameters
     begin_search = False
+    start_box_set = True
     target_box_set = False
     searching = True
     target_box = None
@@ -219,6 +220,8 @@ def main() -> None:
                     elif event.buttons[2]:
                         if grid[i][j].target:
                             target_box_set = False
+                        elif grid[i][j].start:
+                            start_box_set = False
                         grid[i][j].hard_reset()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # TODO: make this feel better before fully incorporating it
@@ -230,6 +233,7 @@ def main() -> None:
                             # set start point
                             case DRAW.START:
                                 if not grid[i][j].wall and not grid[i][j].target:
+                                    start_box_set = True
                                     start_box.hard_reset()
                                     start_box = grid[i][j]
                                     start_box.start = True
@@ -273,7 +277,7 @@ def main() -> None:
                         target_box_set = False
                         searching = True
                         begin_search = False
-                    elif target_box_set:
+                    elif target_box_set and start_box_set:
                         # resets algorithm
                         if begin_search == True:
                             reset(grid, not manhattan)
