@@ -157,6 +157,7 @@ def manhattan_dist(a: Box, b: Box) -> float:
     return abs(a.x - b.x) + abs(a.y - b.y)
 
 def main() -> None:
+    # initial parameters
     begin_search = False
     target_box_set = False
     searching = True
@@ -166,15 +167,14 @@ def main() -> None:
     dijkstra = False
     manhattan = False
 
-    clock = pygame.time.Clock()
-
     win = pygame.display.set_mode((WIN_WIDTH, WIN_HEIGHT))
 
+    # initializes cursor
     draw_state = DRAW.START
-
     cursor = Cursor(0, 0)
     cursor.start = True
 
+    # initializes the grid
     grid = create_grid(GRID_COLUMNS, GRID_ROWS)
     set_neighbours(grid, GRID_COLUMNS, GRID_ROWS, not manhattan)
     start_box = grid[0][0]
@@ -186,6 +186,7 @@ def main() -> None:
 
     path = []
 
+    # initializes all buttons
     manhattan_button = Button(x=MANHATTAN_POS[0], y=MANHATTAN_POS[1], image=BUTTON_IMG, text_input="Euclidean", 
                                 font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
     dijkstra_button = Button(x=DIJKSTRA_POS[0], y=DIJKSTRA_POS[1], image=BUTTON_IMG, text_input="A*", 
@@ -195,11 +196,10 @@ def main() -> None:
 
     # screen with grid and visualization
     def grid_screen() -> None:
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state
 
         pygame.display.set_caption("Pathfinding Visualizer")
         while True:
-            # clock.tick(165)
             for event in pygame.event.get():
                 # mouse position and relative cell
                 x, y = pygame.mouse.get_pos()
@@ -217,6 +217,8 @@ def main() -> None:
                     if event.buttons[0] and not grid[i][j].target and not grid[i][j].start and searching and draw_state == DRAW.WALL:
                         grid[i][j].wall = True
                     elif event.buttons[2]:
+                        if grid[i][j].target:
+                            target_box_set = False
                         grid[i][j].hard_reset()
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     # TODO: make this feel better before fully incorporating it
@@ -372,7 +374,7 @@ def main() -> None:
 
     # main menu screen
     def menu_screen() -> None:
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, clock, win, cursor, grid, start_box, open_set, path, draw_state
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state
 
         buttons = [manhattan_button, dijkstra_button, draw_state_button]
         states = [DRAW.START, DRAW.WALL, DRAW.TARGET]
