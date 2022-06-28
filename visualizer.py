@@ -203,7 +203,8 @@ def main() -> None:
                     ("T: Target", (400, 125)), ("W: Wall", (400, 150)), 
                     ("R: Reset", (400, 175)), ("Esc: Menu", (400, 200)),
                     ("Press any non-hotkey", (250, 400)), ("on the grid screen", (250, 425)),
-                    ("to begin the algorithm", (250, 450))]
+                    ("to begin the algorithm", (250, 450)), ("L Click:", (400, 225)), ("Draw", (400, 245)), 
+                    ("R Click:", (400, 270)), ("Delete", (400, 290))]
 
     # screen with grid and visualization
     def grid_screen() -> None:
@@ -264,7 +265,7 @@ def main() -> None:
                                     target_box_set = True
                     elif event.button == 3 and searching:
                         grid[i][j].hard_reset()
-                # start algorithm
+                # starts algorithm if a hotkey was not pressed. otherwise 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         if not begin_search or not searching:
@@ -296,6 +297,15 @@ def main() -> None:
                             path = []
                         searching = True
                         begin_search = not begin_search
+                    else:
+                        if not target_box_set:
+                            Tk().wm_withdraw()
+                            messagebox.showinfo("No Target", "Please select a target box with T. (Or Esc to see menu)")
+                        elif not start_box_set:
+                            Tk().wm_withdraw()
+                            messagebox.showinfo("No Target", "Please select a start box with S. (Or Esc to see menu)")
+                        else:
+                            logging.error("Target box and start box are set, yet the algorithm did not start.")
 
                 cursor.move(i, j)
                 cursor.hard_reset()
