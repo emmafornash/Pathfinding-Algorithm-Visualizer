@@ -298,12 +298,13 @@ def main() -> None:
                         searching = True
                         begin_search = not begin_search
                     else:
-                        if not target_box_set:
+                        
+                        if not start_box_set:
+                            Tk().wm_withdraw()
+                            messagebox.showinfo("No Start", "Please select a start box with S. (Or Esc to see menu)")
+                        elif not target_box_set:
                             Tk().wm_withdraw()
                             messagebox.showinfo("No Target", "Please select a target box with T. (Or Esc to see menu)")
-                        elif not start_box_set:
-                            Tk().wm_withdraw()
-                            messagebox.showinfo("No Target", "Please select a start box with S. (Or Esc to see menu)")
                         else:
                             logging.error("Target box and start box are set, yet the algorithm did not start.")
 
