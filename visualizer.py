@@ -32,10 +32,13 @@ BASE_BUTTON_COLOR = '#acc9a9'
 HOVERING_BUTTON_COLOR = '#FFFFFF'
 BUTTON_IMG = pygame.transform.scale(pygame.image.load("assets/buttons/button_rect.png"), (240, 75))
 
-FONT = pygame.font.Font("assets/fonts/font.ttf", 25)
+BUTTON_FONT = pygame.font.Font("assets/fonts/font.ttf", 25)
 DRAW_POS = (150, 100)
 MANHATTAN_POS = (150, 200)
 DIJKSTRA_POS = (150, 300)
+
+# text
+TEXT_FONT = pygame.font.Font("assets/fonts/font.ttf", 20)
 
 class DRAW(Enum):
     START = 0
@@ -189,11 +192,18 @@ def main() -> None:
 
     # initializes all buttons
     manhattan_button = Button(x=MANHATTAN_POS[0], y=MANHATTAN_POS[1], image=BUTTON_IMG, text_input="Euclidean", 
-                                font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
+                                font=BUTTON_FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
     dijkstra_button = Button(x=DIJKSTRA_POS[0], y=DIJKSTRA_POS[1], image=BUTTON_IMG, text_input="A*", 
-                                font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
+                                font=BUTTON_FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
     draw_state_button = Button(x=DRAW_POS[0], y=DRAW_POS[1], image=BUTTON_IMG, text_input="Start",
-                                font=FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
+                                font=BUTTON_FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
+
+    # initializes on-screen text in menu
+    hotkey_text = [("Hotkeys:", (400, 50)), ("S: Start", (400, 100)), 
+                    ("T: Target", (400, 125)), ("W: Wall", (400, 150)), 
+                    ("R: Reset", (400, 175)), ("Esc: Menu", (400, 200)),
+                    ("Press any non-hotkey", (250, 400)), ("on the grid screen", (250, 425)),
+                    ("to begin the algorithm", (250, 450))]
 
     # screen with grid and visualization
     def grid_screen() -> None:
@@ -384,17 +394,20 @@ def main() -> None:
         states = [DRAW.START, DRAW.WALL, DRAW.TARGET]
         draw_num = states.index(draw_state)
 
-        match draw_state:
-            case DRAW.START:
-                draw_state_button.change_text("Start")
-            case DRAW.WALL:
-                draw_state_button.change_text("Wall")
-            case DRAW.TARGET:
-                draw_state_button.change_text("Target")
-            case _:
-                pass
+        def change_state_button() -> None:
+            nonlocal draw_state, draw_state_button
+            match draw_state:
+                case DRAW.START:
+                    draw_state_button.change_text("Start")
+                case DRAW.WALL:
+                    draw_state_button.change_text("Wall")
+                case DRAW.TARGET:
+                    draw_state_button.change_text("Target")
+                case _:
+                    pass
 
         pygame.display.set_caption("Menu")
+        change_state_button()
         while True:
             for event in pygame.event.get():
                 # mouse position and relative cell
@@ -407,6 +420,13 @@ def main() -> None:
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_ESCAPE:
                         grid_screen()
+                    elif event.key == pygame.K_s:
+                        draw_state = DRAW.START
+                    elif event.key == pygame.K_w:
+                        draw_state = DRAW.WALL
+                    elif event.key == pygame.K_t:
+                        draw_state = DRAW.TARGET
+                    change_state_button()
                 if event.type == pygame.MOUSEMOTION:
                     for button in buttons:
                         button.change_color((x, y))
@@ -445,6 +465,13 @@ def main() -> None:
 
             for button in buttons:
                 button.draw(win)
+
+            for t in hotkey_text:
+                str, pos = t
+                text = TEXT_FONT.render(str, True, BASE_BUTTON_COLOR, None)
+                rect = text.get_rect()
+                rect.center = pos
+                win.blit(text, rect)
 
             pygame.display.flip()
 
