@@ -208,7 +208,7 @@ def main() -> None:
 
     # screen with grid and visualization
     def grid_screen() -> None:
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state, start_box_set
 
         pygame.display.set_caption("Pathfinding Visualizer")
         while True:
@@ -398,7 +398,7 @@ def main() -> None:
 
     # main menu screen
     def menu_screen() -> None:
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state, start_box_set
 
         buttons = [manhattan_button, dijkstra_button, draw_state_button]
         states = [DRAW.START, DRAW.WALL, DRAW.TARGET]
