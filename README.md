@@ -14,8 +14,8 @@ A pathfinding visualizer in Python.
 
 ### Dependencies
 
-- NumPy
-- Pygame
+- [NumPy](https://numpy.org/doc/)
+- [Pygame](https://www.pygame.org/docs/)
 
 ### Instructions
 
