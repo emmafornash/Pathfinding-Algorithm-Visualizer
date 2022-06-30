@@ -199,16 +199,16 @@ def main() -> None:
                                 font=BUTTON_FONT, base_color=BASE_BUTTON_COLOR, hovering_color=HOVERING_BUTTON_COLOR)
 
     # initializes on-screen text in menu
-    hotkey_text = [("Hotkeys:", (400, 50)), ("S: Start", (400, 100)), 
+    menu_text = [("Hotkeys:", (400, 50)), ("S: Start", (400, 100)), 
                     ("T: Target", (400, 125)), ("W: Wall", (400, 150)), 
                     ("R: Reset", (400, 175)), ("Esc: Menu", (400, 200)),
                     ("Press any non-hotkey", (250, 400)), ("on the grid screen", (250, 425)),
-                    ("to begin the algorithm", (250, 450)), ("L Click:", (400, 225)), ("Draw", (400, 245)), 
+                    ("to begin the algorithm.", (250, 450)), ("L Click:", (400, 225)), ("Draw", (400, 245)), 
                     ("R Click:", (400, 270)), ("Delete", (400, 290))]
 
     # screen with grid and visualization
     def grid_screen() -> None:
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state, start_box_set
 
         pygame.display.set_caption("Pathfinding Visualizer")
         while True:
@@ -298,14 +298,14 @@ def main() -> None:
                         searching = True
                         begin_search = not begin_search
                     else:
-                        if not target_box_set:
+                        if not start_box_set:
                             Tk().wm_withdraw()
-                            messagebox.showinfo("No Target", "Please select a target box with T. (Or Esc to see menu)")
-                        elif not start_box_set:
+                            messagebox.showinfo("No Start", "Please select a start box with S. (Or press Esc to see menu)")
+                        elif not target_box_set:
                             Tk().wm_withdraw()
-                            messagebox.showinfo("No Target", "Please select a start box with S. (Or Esc to see menu)")
+                            messagebox.showinfo("No Target", "Please select a target box with T. (Or press Esc to see menu)")
                         else:
-                            logging.error("Target box and start box are set, yet the algorithm did not start.")
+                            logging.error("Target and start box are set, yet the algorithm did not start.")
 
                 cursor.move(i, j)
                 cursor.hard_reset()
@@ -398,7 +398,7 @@ def main() -> None:
 
     # main menu screen
     def menu_screen() -> None:
-        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state
+        nonlocal begin_search, target_box_set, searching, target_box, dijkstra, manhattan, win, cursor, grid, start_box, open_set, path, draw_state, start_box_set
 
         buttons = [manhattan_button, dijkstra_button, draw_state_button]
         states = [DRAW.START, DRAW.WALL, DRAW.TARGET]
@@ -476,8 +476,7 @@ def main() -> None:
             for button in buttons:
                 button.draw(win)
 
-            for t in hotkey_text:
-                str, pos = t
+            for str, pos in menu_text:
                 text = TEXT_FONT.render(str, True, BASE_BUTTON_COLOR, None)
                 rect = text.get_rect()
                 rect.center = pos
