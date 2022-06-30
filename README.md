@@ -23,7 +23,7 @@ After pip installing the dependencies, download the project and run the `visuali
 
 Press Escape to enter the menu and check parameters and hotkeys. After drawing a start, target and walls, press any non-hotkey to begin the algorithm.
 
-# Acknowledgements
+## Acknowledgements
 
 Button code modified from [this](https://github.com/baraltech/Menu-System-PyGame) project by baraltech.
 
