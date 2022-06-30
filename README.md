@@ -7,7 +7,7 @@ A pathfinding visualizer in Python.
 ## Key Features
 
 - Visualizer for A* and Dijkstra
-- Obsticle drawing
+- Obstacle drawing
 - Algorithm and heuristic switching
 
 ## How to Use
