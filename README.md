@@ -19,7 +19,9 @@ A pathfinding visualizer in Python.
 
 ### Instructions
 
-After pip installing the dependencies, download the project and run the `visualizer.py` file.
+1. Clone this project
+2. Install NumPy and Pygame - `pip install numpy pygame`
+3. Run `visualizer.py`
 
 Press Escape to enter the menu and check parameters and hotkeys. After drawing a start, target and walls, press any non-hotkey to begin the algorithm.
 
