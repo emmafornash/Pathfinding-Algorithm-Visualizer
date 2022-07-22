@@ -7,23 +7,25 @@ A pathfinding visualizer in Python.
 ## Key Features
 
 - Visualizer for A* and Dijkstra
-- Obsticle drawing
+- Obstacle drawing
 - Algorithm and heuristic switching
 
 ## How to Use
 
 ### Dependencies
 
-- NumPy
-- Pygame
+- [NumPy](https://numpy.org/doc/)
+- [Pygame](https://www.pygame.org/docs/)
 
 ### Instructions
 
-After pip installing the dependencies, download the project and run the `visualizer.py` file.
+1. Clone this project
+2. Install NumPy and Pygame - `pip install numpy pygame`
+3. Run `visualizer.py`
 
 Press Escape to enter the menu and check parameters and hotkeys. After drawing a start, target and walls, press any non-hotkey to begin the algorithm.
 
-# Acknowledgements
+## Acknowledgements
 
 Button code modified from [this](https://github.com/baraltech/Menu-System-PyGame) project by baraltech.
 
